@@ -17,9 +17,9 @@
 
 > ⚠️ Demo 实例未配置服务端 API Key，请在页面右上角「设置」中填入你自己的 DeepSeek API Key 后使用。Key 仅保存在你的浏览器本地。
 
-**Demo 地址**：[https://exercise-agent-6lxusneq8w.preview.iga-pages.com](https://exercise-agent-6lxusneq8w.preview.iga-pages.com)
+**Demo 地址**：[https://exercise-agent-6lxusneq8w-h9shwa9qun.preview.iga-pages.com?iga_token=0996e77975652d36ab0495984a818817&iga_time=1786265921](https://exercise-agent-6lxusneq8w-h9shwa9qun.preview.iga-pages.com?iga_token=0996e77975652d36ab0495984a818817&iga_time=1786265921)
 
-（Demo 部署于火山引擎 IGA Pages，仅供体验，不保证可用性。建议自行部署。）
+（Demo 部署于火山引擎 IGA Pages 的预览环境。预览链接含访问 token，每次重新部署会更新且可能过期；如链接失效，建议自行部署。）
 
 ## 🛠 技术栈
 
