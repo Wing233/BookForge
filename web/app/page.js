@@ -185,6 +185,7 @@ export default function Page() {
   const [error, setError] = useState("");
   const [previewHtml, setPreviewHtml] = useState("");
   const stopRef = useRef(false);
+  const abortRef = useRef(null);
   const fileInputRef = useRef(null);
 
   // DeepSeek API 配置（存浏览器 localStorage，调用时经请求头透传到后端）
@@ -298,6 +299,9 @@ export default function Page() {
         continue;
       }
       setCurrentIndex(i);
+      // 为本次请求创建 AbortController，停止时可立即中断
+      const controller = new AbortController();
+      abortRef.current = controller;
       try {
         const res = await fetch("/api/generate", {
           method: "POST",
@@ -307,6 +311,7 @@ export default function Page() {
             "x-deepseek-model": model,
           },
           body: JSON.stringify({ title: sec.title, content: sec.content }),
+          signal: controller.signal,
         });
         const data = await res.json();
         if (!res.ok) {
@@ -319,16 +324,23 @@ export default function Page() {
         };
         setExercisesMap({ ...exercisesMapRef.current });
       } catch (e) {
+        // 用户主动停止，静默退出，不报错
+        if (e.name === "AbortError" || stopRef.current) break;
         setError(e.message);
         break;
       }
     }
+    abortRef.current = null;
     setCurrentIndex(-1);
     setGenerating(false);
   }
 
   function stopGenerate() {
     stopRef.current = true;
+    // 立即中断正在进行的请求，避免等当前慢请求返回
+    if (abortRef.current) {
+      try { abortRef.current.abort(); } catch (e) {}
+    }
   }
 
   function viewBook() {

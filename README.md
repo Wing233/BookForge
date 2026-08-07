@@ -1,33 +1,68 @@
-# 📚 练习册生成器
+<div align="center">
 
-把任意 PDF 教材变成一本可答题、可判分、带解析的交互式练习册。
+# 🔥 炼书 · BookForge
 
-上传 PDF → 浏览器端解析章节 → 调用 DeepSeek 逐节生成练习题 → 一键导出精美单文件 HTML。
+**把任何 PDF 教材，炼成一本可答题、可判分、带解析的交互式练习册。**
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
+[![DeepSeek](https://img.shields.io/badge/LLM-DeepSeek-4B3FE3.svg)](https://platform.deepseek.com/)
+
+</div>
+
+<div align="center">
+  <img src="./docs/banner.jpg" alt="BookForge Banner" width="100%" />
+</div>
+
+---
+
+## 这是什么？
+
+读一本厚厚的 PDF 教材，常常读完就忘。**炼书**帮你把教材「炼」成练习册——上传 PDF，AI 自动识别每个章节，逐节生成单选、多选、判断、填空四种题型的练习题，每题带难度等级和详细解析。生成的练习册是一个**精美单文件 HTML**，支持即时判题、进度追踪、暗色模式、移动端适配，可离线使用。
+
+> 一边读，一边练。把书本炼成能力。
 
 ## ✨ 特性
 
-- **纯前端 PDF 解析**：基于 [pdfjs-dist](https://github.com/mozilla/pdf.js)，PDF 不上传服务器，无文件大小限制，无隐私泄露。
-- **智能章节识别**：优先读取 PDF 内置目录（outline），无目录时按正则识别「第X章」「X.Y」等标题。
-- **多种题型**：单选、多选、判断、填空，每题含难度等级和详细解析。
-- **即时判题 + 进度统计**：答题后立即判分，章节目录显示完成进度，localStorage 持久化答题记录。
-- **精美单文件 HTML 导出**：生成的练习册是一个独立 HTML 文件，含暗色模式、移动端适配、章节侧边栏，可离线使用。
-- **双 Key 配置**：支持服务端环境变量（生产推荐）或浏览器端临时填写（演示方便），灵活适配不同部署场景。
+- 📄 **纯前端 PDF 解析** —— 基于 [pdfjs-dist](https://github.com/mozilla/pdf.js)，PDF 不上传服务器，无大小限制，无隐私泄露
+- 🧠 **智能章节识别** —— 优先读 PDF 内置目录，无目录时按正则识别「第X章」「X.Y」等标题
+- 🎯 **四种题型** —— 单选 / 多选 / 判断 / 填空，每题含难度和解析，难度分布合理
+- ⚡ **即时判题 + 进度追踪** —— 答题即判分，章节侧边栏显示完成度，localStorage 持久化
+- 🎨 **精美单文件 HTML 导出** —— 暗色模式、移动端适配、章节树侧边栏，一个文件搞定一切
+- 🔑 **双 Key 配置** —— 服务端环境变量（生产推荐）或浏览器端临时填写（演示方便）
+- ⏸️ **可中断生成** —— 一键停止，已生成题目保留，AbortController 即时中断
+
+## 📸 演示
+
+<div align="center">
+
+**上传界面** —— 纯前端解析，Key 状态一目了然
+
+<img src="./docs/screenshot-upload.jpg" alt="上传界面" width="80%" />
+
+**API 设置面板** —— 浏览器端临时填写，含安全提醒
+
+<img src="./docs/screenshot-settings.jpg" alt="设置面板" width="80%" />
+
+</div>
 
 ## 🎯 在线 Demo
 
 > ⚠️ Demo 实例未配置服务端 API Key，请在页面右上角「设置」中填入你自己的 DeepSeek API Key 后使用。Key 仅保存在你的浏览器本地。
 
-**Demo 地址**：[https://exercise-agent-6lxusneq8w-h9shwa9qun.preview.iga-pages.com?iga_token=0996e77975652d36ab0495984a818817&iga_time=1786265921](https://exercise-agent-6lxusneq8w-h9shwa9qun.preview.iga-pages.com?iga_token=0996e77975652d36ab0495984a818817&iga_time=1786265921)
+**Demo 地址**：[https://exercise-agent-6lxusneq8w-65e3qtk9fa.preview.iga-pages.com?iga_token=706fdd89d76794e59e03ea9f6a1ce1ff&iga_time=1786266447](https://exercise-agent-6lxusneq8w-65e3qtk9fa.preview.iga-pages.com?iga_token=706fdd89d76794e59e03ea9f6a1ce1ff&iga_time=1786266447)
 
 （Demo 部署于火山引擎 IGA Pages 的预览环境。预览链接含访问 token，每次重新部署会更新且可能过期；如链接失效，建议自行部署。）
 
 ## 🛠 技术栈
 
-- **框架**：[Next.js](https://nextjs.org/) 16 (App Router)
-- **PDF 解析**：[pdfjs-dist](https://github.com/mozilla/pdf.js)
-- **LLM**：[DeepSeek API](https://platform.deepseek.com/)（OpenAI 兼容协议，via `openai` SDK）
-- **前端**：React 19，纯 CSS（无 UI 框架，零额外依赖）
-- **语言**：JavaScript（无 TypeScript）
+| 层 | 选型 | 说明 |
+|---|---|---|
+| 框架 | [Next.js](https://nextjs.org/) 16 (App Router) | 全栈，API Route 调 LLM |
+| PDF 解析 | [pdfjs-dist](https://github.com/mozilla/pdf.js) | 浏览器端，无上传 |
+| LLM | [DeepSeek API](https://platform.deepseek.com/) | OpenAI 兼容协议，via `openai` SDK |
+| 前端 | React 19 + 纯 CSS | 无 UI 框架，零额外依赖 |
+| 语言 | JavaScript | 无 TypeScript |
 
 ## 📦 本地运行
 
@@ -94,6 +129,10 @@ npm run start
 
 ```
 练习册/
+├── docs/                            # README 配图
+│   ├── banner.jpg
+│   ├── screenshot-upload.jpg
+│   └── screenshot-settings.jpg
 ├── web/
 │   ├── app/
 │   │   ├── api/generate/route.js   # 生成练习题的 API 接口
@@ -119,6 +158,21 @@ npm run start
 - **API Key**：服务端环境变量方式下 Key 不离开服务端；浏览器端填写方式下 Key 会经请求头发送到服务端。
 - **答题记录**：仅保存在你的浏览器 localStorage，不上传任何服务器。
 
+## 🤝 适合谁用
+
+- 📚 想把教材读厚再读薄的学生
+- 👨‍🏫 需要快速出练习题的教师
+- 🧑‍💻 喜欢边读边练的自学者
+- 🔬 想体验「PDF + LLM 自动出题」的开发者
+
 ## 📄 License
 
 [MIT](./LICENSE)
+
+---
+
+<div align="center">
+
+**炼书 · BookForge** —— 把书本炼成能力 🔥
+
+</div>
