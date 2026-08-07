@@ -94,12 +94,12 @@ const PAGE_CSS = `
 .wg-card .sub { color: var(--text-muted); font-size: 14px; margin-bottom: 24px; }
 .wg-drop {
   border: 2px dashed var(--border-strong); border-radius: var(--radius-card);
-  padding: 32px; text-align: center; cursor: pointer; transition: all 0.15s;
-  margin-bottom: 16px;
+  padding: 24px 20px; text-align: center; cursor: pointer; transition: all 0.15s;
+  margin-bottom: 16px; display: block;
 }
 .wg-drop:hover { border-color: var(--brand); background: var(--brand-soft); }
-.wg-drop .icon { font-size: 36px; margin-bottom: 8px; }
-.wg-drop .t { font-weight: 600; margin-bottom: 4px; }
+.wg-drop .icon { font-size: 32px; margin-bottom: 6px; }
+.wg-drop .t { font-weight: 600; margin-bottom: 4px; word-break: break-all; }
 .wg-drop .s { font-size: 12px; color: var(--text-soft); }
 .wg-file-name { font-size: 13px; color: var(--text-muted); margin-bottom: 12px; word-break: break-all; }
 .wg-btn {
