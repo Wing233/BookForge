@@ -144,30 +144,41 @@ const PAGE_CSS = `
 .wg-spinner { width: 14px; height: 14px; border: 2px solid var(--border-strong); border-top-color: var(--brand); border-radius: 50%; animation: wg-spin 0.6s linear infinite; display: inline-block; }
 @keyframes wg-spin { to { transform: rotate(360deg); } }
 @media (max-width: 640px) { .wg-card { padding: 20px; } .wg-main { padding: 20px 14px 48px; } }
-.wg-settings-panel {
-  margin-top: 16px; padding: 16px; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--surface-muted);
-}
-.wg-settings-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
-.wg-settings-panel .field { margin-bottom: 12px; }
-.wg-settings-panel label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
-.wg-settings-panel input {
-  width: 100%; padding: 8px 12px; border: 1px solid var(--border);
-  border-radius: var(--radius); background: var(--surface); color: var(--text);
-  font-size: 13px; font-family: inherit;
-}
-.wg-settings-panel .hint {
-  font-size: 12px; color: var(--text-soft); margin-top: 8px; line-height: 1.6;
-}
-.wg-settings-panel .warn {
-  margin-top: 8px; padding: 8px 12px; background: rgba(239,170,23,0.08);
-  border-left: 3px solid var(--warning); border-radius: 4px;
-  font-size: 12px; color: var(--text-muted); line-height: 1.6;
-}
 .wg-key-status {
   font-size: 12px; color: var(--text-soft); margin-left: auto;
 }
 .wg-key-status.set { color: var(--success); }
+.wg-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 90;
+}
+.wg-modal {
+  position: fixed; top: 70px; right: 20px; z-index: 100;
+  width: 360px; max-width: calc(100vw - 40px);
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-card); box-shadow: var(--shadow-md);
+  padding: 20px;
+}
+.wg-modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.wg-modal .modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.wg-modal .field { margin-bottom: 12px; }
+.wg-modal label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.wg-modal input {
+  width: 100%; padding: 8px 12px; border: 1px solid var(--border);
+  border-radius: var(--radius); background: var(--surface); color: var(--text);
+  font-size: 13px; font-family: inherit; box-sizing: border-box;
+}
+.wg-modal .hint {
+  font-size: 11px; color: var(--text-soft); margin-top: 6px; line-height: 1.6;
+}
+.wg-modal .warn {
+  margin-top: 8px; padding: 8px 12px; background: rgba(239,170,23,0.08);
+  border-left: 3px solid var(--warning); border-radius: 4px;
+  font-size: 11px; color: var(--text-muted); line-height: 1.6;
+}
+.wg-modal .wg-row { margin-top: 14px; }
+@media (max-width: 640px) {
+  .wg-modal { right: 10px; left: 10px; width: auto; max-width: none; }
+}
 `;
 
 // ---------- 组件 ----------
@@ -410,60 +421,60 @@ export default function Page() {
         </button>
       </header>
 
-      <main className="wg-main">
-        {showSettings && (
-          <div className="wg-card" style={{ marginBottom: 20 }}>
-            <h2>API 设置</h2>
-            <p className="sub">配置 DeepSeek API Key 以生成练习题。Key 保存在浏览器本地。</p>
-            <div className="wg-settings-panel">
-              <div className="field">
-                <label>DeepSeek API Key</label>
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-                />
-              </div>
-              <div className="field">
-                <label>模型</label>
-                <input
-                  type="text"
-                  value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder="deepseek-chat"
-                />
-                <div className="hint">
-                  常用模型：deepseek-chat（V3，通用）、deepseek-reasoner（R1，推理）。详见 DeepSeek 官方文档。
-                </div>
-              </div>
-              <div className="warn">
-                ⚠️ 安全提示：你填入的 Key 仅保存在本浏览器 localStorage，但调用时会通过请求头发送到部署的服务端再转发给 DeepSeek。
-                请仅在你信任的部署实例上填写；生产环境建议改为服务端环境变量 <code>DEEPSEEK_API_KEY</code>。
-              </div>
-              <div className="wg-row" style={{ marginTop: 12 }}>
-                <button className="wg-btn wg-btn-primary" onClick={saveSettings}>保存</button>
-                <button className="wg-btn" onClick={() => setShowSettings(false)}>取消</button>
-                {apiKey && (
-                  <button
-                    className="wg-btn wg-btn-danger"
-                    onClick={() => {
-                      setApiKey("");
-                      setModel("deepseek-chat");
-                      try {
-                        localStorage.removeItem("wg_deepseek_key");
-                        localStorage.removeItem("wg_deepseek_model");
-                      } catch (e) {}
-                    }}
-                  >
-                    清除
-                  </button>
-                )}
+      {showSettings && (
+        <>
+          <div className="wg-overlay" onClick={() => setShowSettings(false)} />
+          <div className="wg-modal" role="dialog" aria-label="API 设置">
+            <h3>API 设置</h3>
+            <p className="modal-sub">配置 DeepSeek API Key 以生成练习题。Key 保存在浏览器本地。</p>
+            <div className="field">
+              <label>DeepSeek API Key</label>
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+              />
+            </div>
+            <div className="field">
+              <label>模型</label>
+              <input
+                type="text"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="deepseek-chat"
+              />
+              <div className="hint">
+                常用模型：deepseek-chat（V3，通用）、deepseek-reasoner（R1，推理）。
               </div>
             </div>
+            <div className="warn">
+              ⚠️ 安全提示：Key 仅保存在本浏览器 localStorage，但调用时会经请求头发送到服务端再转发给 DeepSeek。请仅在你信任的部署实例上填写；生产环境建议改用服务端环境变量 <code>DEEPSEEK_API_KEY</code>。
+            </div>
+            <div className="wg-row">
+              <button className="wg-btn wg-btn-primary" onClick={saveSettings}>保存</button>
+              <button className="wg-btn" onClick={() => setShowSettings(false)}>取消</button>
+              {apiKey && (
+                <button
+                  className="wg-btn wg-btn-danger"
+                  onClick={() => {
+                    setApiKey("");
+                    setModel("deepseek-chat");
+                    try {
+                      localStorage.removeItem("wg_deepseek_key");
+                      localStorage.removeItem("wg_deepseek_model");
+                    } catch (e) {}
+                  }}
+                >
+                  清除
+                </button>
+              )}
+            </div>
           </div>
-        )}
+        </>
+      )}
 
+      <main className="wg-main">
         {stage === "upload" && (
           <div className="wg-card">
             <h2>上传 PDF 教材</h2>

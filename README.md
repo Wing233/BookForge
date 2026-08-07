@@ -40,9 +40,17 @@
 
 <img src="./docs/screenshot-upload.jpg" alt="上传界面" width="80%" />
 
-**API 设置面板** —— 浏览器端临时填写，含安全提醒
+**API 设置面板** —— 浮层式，浏览器端临时填写，含安全提醒
 
 <img src="./docs/screenshot-settings.jpg" alt="设置面板" width="80%" />
+
+**生成中** —— 章节树 + 进度统计 + 逐节生成
+
+<img src="./docs/screenshot-generate.jpg" alt="生成界面" width="80%" />
+
+**练习册预览** —— 即时判题、解析、进度追踪
+
+<img src="./docs/screenshot-exercise.jpg" alt="练习册预览" width="80%" />
 
 </div>
 
@@ -132,7 +140,9 @@ npm run start
 ├── docs/                            # README 配图
 │   ├── banner.jpg
 │   ├── screenshot-upload.jpg
-│   └── screenshot-settings.jpg
+│   ├── screenshot-settings.jpg
+│   ├── screenshot-generate.jpg
+│   └── screenshot-exercise.jpg
 ├── web/
 │   ├── app/
 │   │   ├── api/generate/route.js   # 生成练习题的 API 接口
