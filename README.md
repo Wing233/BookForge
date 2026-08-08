@@ -56,9 +56,9 @@
 
 ## 🎯 在线 Demo
 
-> ⚠️ Demo 实例未配置服务端 API Key，请在页面右上角「设置」中填入你自己的 DeepSeek API Key 后使用。Key 仅保存在你的浏览器本地。
+> ⚠️ Demo 实例未配置服务端 API Key，请在页面右上角「设置」中填入你自己的 API Key 后使用（支持 DeepSeek / OpenAI / OpenRouter 等厂商）。Key 仅保存在你的浏览器本地。
 
-**Demo 地址**：[https://exercise-agent-6lxusneq8w-65e3qtk9fa.preview.iga-pages.com?iga_token=706fdd89d76794e59e03ea9f6a1ce1ff&iga_time=1786266447](https://exercise-agent-6lxusneq8w-65e3qtk9fa.preview.iga-pages.com?iga_token=706fdd89d76794e59e03ea9f6a1ce1ff&iga_time=1786266447)
+**Demo 地址**：[https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com?iga_token=0db74cab7483001f8bf3127f01c433bd&iga_time=1786361574](https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com?iga_token=0db74cab7483001f8bf3127f01c433bd&iga_time=1786361574)
 
 （Demo 部署于火山引擎 IGA Pages 的预览环境。预览链接含访问 token，每次重新部署会更新且可能过期；如链接失效，建议自行部署。）
 
