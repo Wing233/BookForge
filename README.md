@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black.svg)](https://nextjs.org/)
-[![DeepSeek](https://img.shields.io/badge/LLM-DeepSeek-4B3FE3.svg)](https://platform.deepseek.com/)
+[![LLM](https://img.shields.io/badge/LLM-OpenAI兼容-4B3FE3.svg)](https://platform.deepseek.com/)
 
 </div>
 
@@ -29,6 +29,7 @@
 - 🎯 **四种题型** —— 单选 / 多选 / 判断 / 填空，每题含难度和解析，难度分布合理
 - ⚡ **即时判题 + 进度追踪** —— 答题即判分，章节侧边栏显示完成度，localStorage 持久化
 - 🎨 **精美单文件 HTML 导出** —— 暗色模式、移动端适配、章节树侧边栏，一个文件搞定一切
+- 🧩 **多 LLM 厂商** —— 兼容所有 OpenAI 协议：DeepSeek / OpenAI / OpenRouter / Moonshot / 通义千问，一键切换预设
 - 🔑 **双 Key 配置** —— 服务端环境变量（生产推荐）或浏览器端临时填写（演示方便）
 - ⏸️ **可中断生成** —— 一键停止，已生成题目保留，AbortController 即时中断
 
@@ -58,9 +59,9 @@
 
 > ⚠️ Demo 实例未配置服务端 API Key，请在页面右上角「设置」中填入你自己的 API Key 后使用（支持 DeepSeek / OpenAI / OpenRouter 等厂商）。Key 仅保存在你的浏览器本地。
 
-**Demo 地址**：[https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com?iga_token=0db74cab7483001f8bf3127f01c433bd&iga_time=1786361574](https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com?iga_token=0db74cab7483001f8bf3127f01c433bd&iga_time=1786361574)
+**Demo 地址**：[https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com/](https://exercise-agent-6lxusneq8w-zv3u9l4nvx.preview.iga-pages.com/)
 
-（Demo 部署于火山引擎 IGA Pages 的预览环境。预览链接含访问 token，每次重新部署会更新且可能过期；如链接失效，建议自行部署。）
+（Demo 部署于火山引擎 IGA Pages 的预览环境。如链接失效，建议自行部署。）
 
 ## 🛠 技术栈
 
@@ -68,7 +69,7 @@
 |---|---|---|
 | 框架 | [Next.js](https://nextjs.org/) 16 (App Router) | 全栈，API Route 调 LLM |
 | PDF 解析 | [pdfjs-dist](https://github.com/mozilla/pdf.js) | 浏览器端，无上传 |
-| LLM | [DeepSeek API](https://platform.deepseek.com/) | OpenAI 兼容协议，via `openai` SDK |
+| LLM | OpenAI 兼容 API | 支持 DeepSeek / OpenAI / OpenRouter / Moonshot / 通义千问等，via `openai` SDK |
 | 前端 | React 19 + 纯 CSS | 无 UI 框架，零额外依赖 |
 | 语言 | JavaScript | 无 TypeScript |
 
@@ -82,21 +83,31 @@ cd 练习册/web
 npm install
 ```
 
-### 2. 配置 DeepSeek API Key（二选一）
+### 2. 配置 LLM API Key（二选一）
+
+本项目兼容所有 OpenAI 协议厂商，默认使用 DeepSeek。常用厂商及配置：
+
+| 厂商 | Base URL | 模型示例 | 申请地址 |
+|---|---|---|---|
+| DeepSeek | `https://api.deepseek.com` | `deepseek-chat` | https://platform.deepseek.com/api_keys |
+| OpenAI | `https://api.openai.com/v1` | `gpt-4o-mini` | https://platform.openai.com/api-keys |
+| OpenRouter | `https://openrouter.ai/api/v1` | `openai/gpt-4o-mini` | https://openrouter.ai/keys |
+| Moonshot | `https://api.moonshot.cn/v1` | `moonshot-v1-8k` | https://platform.moonshot.cn/console/api-keys |
+| 通义千问 | `https://dashscope.aliyuncs.com/compatible-mode/v1` | `qwen-plus` | https://dashscope.console.aliyun.com/apiKey |
 
 **方式 A：服务端环境变量（推荐，安全）**
 
 ```bash
 cp .env.example .env.local
-# 编辑 .env.local，填入你的 API Key
-# DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# 编辑 .env.local，填入你的 API Key 和（可选）Base URL / 模型名
+# LLM_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+# LLM_BASE_URL=https://api.deepseek.com
+# LLM_MODEL=deepseek-chat
 ```
-
-申请地址：https://platform.deepseek.com/api_keys
 
 **方式 B：浏览器端临时填写（方便体验）**
 
-跳过环境变量配置，启动后在页面右上角点击 ⚙️「设置」填入 Key。Key 仅保存在当前浏览器 localStorage，调用时经请求头透传到服务端再转发给 DeepSeek。
+跳过环境变量配置，启动后在页面右上角点击 ⚙️「设置」填入。面板内置厂商预设按钮，一键填好 Base URL 和默认模型。Key 仅保存在当前浏览器 localStorage，调用时经请求头透传到服务端再转发给对应 LLM。
 
 > ⚠️ **安全提示**：方式 B 中你的 Key 会经过部署的服务端。请仅在你信任的部署实例上使用此方式；公开 Demo 上请勿填写真实 Key。
 
@@ -119,17 +130,17 @@ npm run start
 
 本项目是标准 Next.js 应用，可部署到任何支持 Node.js 的平台：
 
-- **Vercel**：导入 GitHub 仓库，在项目设置中添加环境变量 `DEEPSEEK_API_KEY` 即可。
+- **Vercel**：导入 GitHub 仓库，在项目设置中添加环境变量 `LLM_API_KEY`（可选 `LLM_BASE_URL` / `LLM_MODEL`）即可。
 - **火山引擎 IGA Pages**：参考[官方文档](https://www.volcengine.com/product/iga-pages)，部署后配置环境变量。
 - **自托管**：`npm run build && npm run start`，用 nginx 反代 3000 端口。
 
-> 不论部署到哪里，**务必通过环境变量配置 `DEEPSEEK_API_KEY`**，不要把 Key 写进代码或提交到仓库。
+> 不论部署到哪里，**务必通过环境变量配置 `LLM_API_KEY`**，不要把 Key 写进代码或提交到仓库。
 
 ## 📖 使用流程
 
 1. 打开页面，点击「点击选择 PDF 文件」上传一本 PDF 教材。
 2. 点击「开始解析」，浏览器本地解析章节结构（大文件可能需要几秒）。
-3. 解析完成后，点击「开始生成」，逐节调用 DeepSeek 生成练习题。
+3. 解析完成后，点击「开始生成」，逐节调用 LLM 生成练习题。
 4. 生成过程中可随时点击「停止生成」，已生成的题目会保留。
 5. 全部生成后，点击「查看练习册」预览，可「下载 HTML」导出为单文件。
 
@@ -150,7 +161,7 @@ npm run start
 │   │   ├── page.js                  # 主页面（上传、解析、生成、预览）
 │   │   └── layout.js
 │   ├── lib/
-│   │   ├── deepseek.js              # DeepSeek API 调用 + Prompt
+│   │   ├── deepseek.js              # LLM API 调用 + Prompt（兼容 OpenAI 协议）
 │   │   └── exercise-template.js     # 练习册 HTML 模板
 │   ├── public/
 │   ├── .env.example                 # 环境变量示例
@@ -164,7 +175,7 @@ npm run start
 ## 🔒 隐私说明
 
 - **PDF 文件**：完全在你的浏览器本地解析，不会上传到任何服务器。
-- **章节文本**：生成练习题时，章节文本会发送到你部署的服务端，再转发给 DeepSeek API。
+- **章节文本**：生成练习题时，章节文本会发送到你部署的服务端，再转发给你配置的 LLM API。
 - **API Key**：服务端环境变量方式下 Key 不离开服务端；浏览器端填写方式下 Key 会经请求头发送到服务端。
 - **答题记录**：仅保存在你的浏览器 localStorage，不上传任何服务器。
 
