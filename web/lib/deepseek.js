@@ -109,24 +109,36 @@ function normalizeExercise(ex) {
 
 // ---------- 对外：为单个章节生成练习题 ----------
 // options.apiKey / options.baseUrl / options.model 由调用方传入，
-// 优先级：调用方传入 > 环境变量。这样前端面板填入的 key 可经请求头透传到此处。
+// 优先级：调用方传入 > 环境变量 LLM_* > 环境变量 DEEPSEEK_*（旧名兼容）。
+// 兼容所有 OpenAI 协议厂商：DeepSeek / OpenAI / OpenRouter / Moonshot / 通义 等。
 export async function generateExercises(title, content, options = {}) {
   if (!content || content.length < SECTION_MIN_CHARS) {
     return [];
   }
 
-  const DEEPSEEK_API_KEY = options.apiKey || process.env.DEEPSEEK_API_KEY || "";
-  const DEEPSEEK_BASE_URL =
-    options.baseUrl || process.env.DEEPSEEK_BASE_URL || "https://api.deepseek.com";
-  const DEEPSEEK_MODEL = options.model || process.env.DEEPSEEK_MODEL || "deepseek-chat";
+  const apiKey =
+    options.apiKey ||
+    process.env.LLM_API_KEY ||
+    process.env.DEEPSEEK_API_KEY ||
+    "";
+  const baseUrl =
+    options.baseUrl ||
+    process.env.LLM_BASE_URL ||
+    process.env.DEEPSEEK_BASE_URL ||
+    "https://api.deepseek.com";
+  const model =
+    options.model ||
+    process.env.LLM_MODEL ||
+    process.env.DEEPSEEK_MODEL ||
+    "deepseek-chat";
 
-  if (!DEEPSEEK_API_KEY) {
-    throw new Error("未配置 DEEPSEEK_API_KEY，请在页面顶部填写或设置环境变量");
+  if (!apiKey) {
+    throw new Error("未配置 API Key，请在页面右上角「设置」填写或配置环境变量 LLM_API_KEY");
   }
 
   const client = new OpenAI({
-    apiKey: DEEPSEEK_API_KEY,
-    baseURL: DEEPSEEK_BASE_URL,
+    apiKey,
+    baseURL: baseUrl,
   });
 
   const userPrompt = buildUserPrompt(title, content);
@@ -135,12 +147,12 @@ export async function generateExercises(title, content, options = {}) {
   for (let attempt = 0; attempt <= GENERATE_MAX_RETRIES; attempt++) {
     try {
       const resp = await client.chat.completions.create({
-        model: DEEPSEEK_MODEL,
+        model,
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
         ],
-        // DeepSeek 支持 json_object 模式，强制输出合法 JSON
+        // 支持 json_object 模式的厂商会强制输出合法 JSON；不支持时此参数会被忽略
         response_format: { type: "json_object" },
         temperature: 0.7,
       });

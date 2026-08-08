@@ -176,6 +176,14 @@ const PAGE_CSS = `
   font-size: 11px; color: var(--text-muted); line-height: 1.6;
 }
 .wg-modal .wg-row { margin-top: 14px; }
+.wg-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.wg-preset {
+  padding: 5px 12px; border: 1px solid var(--border); background: var(--surface);
+  color: var(--text-muted); border-radius: var(--radius-full); cursor: pointer;
+  font-size: 12px; transition: all 0.15s;
+}
+.wg-preset:hover { border-color: var(--brand); color: var(--brand); }
+.wg-preset.active { background: var(--brand); color: var(--brand-on); border-color: var(--brand); }
 @media (max-width: 640px) {
   .wg-modal { right: 10px; left: 10px; width: auto; max-width: none; }
 }
@@ -199,8 +207,10 @@ export default function Page() {
   const abortRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // DeepSeek API 配置（存浏览器 localStorage，调用时经请求头透传到后端）
+  // LLM API 配置（存浏览器 localStorage，调用时经请求头透传到后端）
+  // 兼容所有 OpenAI 协议厂商：DeepSeek / OpenAI / OpenRouter / Moonshot / 通义 等
   const [apiKey, setApiKey] = useState("");
+  const [baseUrl, setBaseUrl] = useState("https://api.deepseek.com");
   const [model, setModel] = useState("deepseek-chat");
   const [showSettings, setShowSettings] = useState(false);
 
@@ -208,9 +218,11 @@ export default function Page() {
     try {
       const t = localStorage.getItem("wg_theme") || "light";
       setTheme(t);
-      const k = localStorage.getItem("wg_deepseek_key") || "";
-      const m = localStorage.getItem("wg_deepseek_model") || "deepseek-chat";
+      const k = localStorage.getItem("wg_llm_key") || "";
+      const b = localStorage.getItem("wg_llm_base_url") || "https://api.deepseek.com";
+      const m = localStorage.getItem("wg_llm_model") || "deepseek-chat";
       setApiKey(k);
+      setBaseUrl(b);
       setModel(m);
     } catch (e) {}
   }, []);
@@ -225,11 +237,21 @@ export default function Page() {
 
   function saveSettings() {
     try {
-      localStorage.setItem("wg_deepseek_key", apiKey);
-      localStorage.setItem("wg_deepseek_model", model);
+      localStorage.setItem("wg_llm_key", apiKey);
+      localStorage.setItem("wg_llm_base_url", baseUrl);
+      localStorage.setItem("wg_llm_model", model);
     } catch (e) {}
     setShowSettings(false);
   }
+
+  // 厂商预设：点击自动填好 baseURL 和默认模型
+  const LLM_PRESETS = [
+    { name: "DeepSeek", baseUrl: "https://api.deepseek.com", model: "deepseek-chat" },
+    { name: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+    { name: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1", model: "openai/gpt-4o-mini" },
+    { name: "Moonshot", baseUrl: "https://api.moonshot.cn/v1", model: "moonshot-v1-8k" },
+    { name: "通义千问", baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1", model: "qwen-plus" },
+  ];
 
   const sections = book ? book.sections : [];
   const completedCount = useMemo(
@@ -289,7 +311,7 @@ export default function Page() {
   async function startGenerate() {
     // 前端未填 key 且后端也可能未配置环境变量时，提前提示
     if (!apiKey) {
-      setError("请先点击右上角「设置」填写 DeepSeek API Key");
+      setError("请先点击右上角「设置」填写 API Key");
       setShowSettings(true);
       return;
     }
@@ -318,8 +340,9 @@ export default function Page() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-deepseek-api-key": apiKey,
-            "x-deepseek-model": model,
+            "x-llm-api-key": apiKey,
+            "x-llm-base-url": baseUrl,
+            "x-llm-model": model,
           },
           body: JSON.stringify({ title: sec.title, content: sec.content }),
           signal: controller.signal,
@@ -411,7 +434,7 @@ export default function Page() {
       <header className="wg-header">
         <h1>📚 练习册生成器</h1>
         <span className={`wg-key-status${apiKey ? " set" : ""}`}>
-          {apiKey ? `● 已配置 ${model}` : "○ 未配置 API Key"}
+          {apiKey ? `● ${model}` : "○ 未配置 API Key"}
         </span>
         <button className="wg-theme-btn" onClick={() => setShowSettings(!showSettings)} aria-label="API 设置" title="API 设置">
           ⚙️
@@ -426,15 +449,40 @@ export default function Page() {
           <div className="wg-overlay" onClick={() => setShowSettings(false)} />
           <div className="wg-modal" role="dialog" aria-label="API 设置">
             <h3>API 设置</h3>
-            <p className="modal-sub">配置 DeepSeek API Key 以生成练习题。Key 保存在浏览器本地。</p>
+            <p className="modal-sub">兼容所有 OpenAI 协议厂商，选预设或自定义。配置保存在浏览器本地。</p>
             <div className="field">
-              <label>DeepSeek API Key</label>
+              <label>厂商预设</label>
+              <div className="wg-presets">
+                {LLM_PRESETS.map((p) => (
+                  <button
+                    key={p.name}
+                    type="button"
+                    className={`wg-preset${baseUrl === p.baseUrl ? " active" : ""}`}
+                    onClick={() => { setBaseUrl(p.baseUrl); setModel(p.model); }}
+                  >
+                    {p.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="field">
+              <label>API Key</label>
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
               />
+            </div>
+            <div className="field">
+              <label>API Base URL</label>
+              <input
+                type="text"
+                value={baseUrl}
+                onChange={(e) => setBaseUrl(e.target.value)}
+                placeholder="https://api.deepseek.com"
+              />
+              <div className="hint">兼容 OpenAI 协议的接口地址，如 https://api.openai.com/v1</div>
             </div>
             <div className="field">
               <label>模型</label>
@@ -444,12 +492,9 @@ export default function Page() {
                 onChange={(e) => setModel(e.target.value)}
                 placeholder="deepseek-chat"
               />
-              <div className="hint">
-                常用模型：deepseek-chat（V3，通用）、deepseek-reasoner（R1，推理）。
-              </div>
             </div>
             <div className="warn">
-              ⚠️ 安全提示：Key 仅保存在本浏览器 localStorage，但调用时会经请求头发送到服务端再转发给 DeepSeek。请仅在你信任的部署实例上填写；生产环境建议改用服务端环境变量 <code>DEEPSEEK_API_KEY</code>。
+              ⚠️ 安全提示：Key 仅保存在本浏览器 localStorage，但调用时会经请求头发送到服务端再转发给 LLM。请仅在你信任的部署实例上填写；生产环境建议改用服务端环境变量 <code>LLM_API_KEY</code>。
             </div>
             <div className="wg-row">
               <button className="wg-btn wg-btn-primary" onClick={saveSettings}>保存</button>
@@ -459,10 +504,12 @@ export default function Page() {
                   className="wg-btn wg-btn-danger"
                   onClick={() => {
                     setApiKey("");
+                    setBaseUrl("https://api.deepseek.com");
                     setModel("deepseek-chat");
                     try {
-                      localStorage.removeItem("wg_deepseek_key");
-                      localStorage.removeItem("wg_deepseek_model");
+                      localStorage.removeItem("wg_llm_key");
+                      localStorage.removeItem("wg_llm_base_url");
+                      localStorage.removeItem("wg_llm_model");
                     } catch (e) {}
                   }}
                 >
